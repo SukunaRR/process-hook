@@ -53,7 +53,7 @@ public final class deviceProperties {
     public static final deviceInfo SAMSUNG_S24_ULTRA = new deviceInfo(
         "samsung",          // Manufacturer
         "samsung",          // Brand
-        "e3qxeea",          // Product
+        "b0qxxx",          // Product
         "SM-S928B",         // Device 
         "SM-S928B",         // Model 
         "qcom",             // Hardware
