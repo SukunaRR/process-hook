@@ -128,23 +128,7 @@ public final class deviceProperties {
         null,               // Hostname (optional)
         null                // Fingerprint (optional)
     );
-
-    // Poco F6 Pro Profile
-    public static final deviceInfo POCO_F6_PRO = new deviceInfo(
-        "xiaomi",           // Manufacturer
-        "xiaomi",           // Brand
-        "vermeer",          // Product
-        "23113RKC6G",       // Device
-        "23049PCD8G",       // Model
-        "qcom",             // Hardware
-        null,               // Board (optional)
-        null,               // Bootloader (optional)
-        "120",              // Refresh rate (Hz)
-        null,               // Username (optional)
-        null,               // Hostname (optional)
-        null                // Fingerprint (optional)
-    );
-
+    
     // Xiaomi 14 Pro Profile
     public static final deviceInfo MI_14_PRO = new deviceInfo(
         "xiaomi",           // Manufacturer
@@ -161,13 +145,29 @@ public final class deviceProperties {
         null                // Fingerprint (optional)
     );
 
+    // POCO X6 Pro Profile
+    public static final deviceInfo POCO_X6_PRO = new deviceInfo(
+        "xiaomi",           // Manufacturer
+        "POCO",           // Brand
+        "ingres",         // Product
+        "POCO X6 Pro",       // Device
+        "POCO X6 Pro",       // Model
+        "mtk",             // Hardware
+        null,               // Board (optional)
+        null,               // Bootloader (optional)
+        "120",              // Refresh rate (Hz)
+        null,               // Username (optional)
+        null,               // Hostname (optional)
+        "POCO/ingres_eea/ingres:13/SKQ1.220303.001/V14.0.5.0.TLJEUXM:user/release-keys"                // Fingerprint (optional)
+    );
+
     // Static block to populate DEVICE_MAP with device profiles mapped to specific apps
     static {
 
         // Debug device mapping
         DEVICE_MAP.put("com.ytheekshana.deviceinfo", DEBUG_1);
         DEVICE_MAP.put("ru.andr7e.deviceinfohw", ROG_PHONE_8);
-        DEVICE_MAP.put("com.finalwire.aida64", SAMSUNG_S24_ULTRA);
+        DEVICE_MAP.put("com.finalwire.aida64", POCO_X6_PRO);
 
         // Populate device map for ROG Phone 8 apps
         String[] rogPhoneApps = {
@@ -243,12 +243,12 @@ public final class deviceProperties {
 
         // Populate device map for Poco F6 Pro apps
         String[] pocoApps = {
-            "com.dts.freefiremax",
+            "com.pubg.imobile",
             "com.dts.freefire",
             "com.garena.game.codm",
             "com.garena.game.kgvn"
         };
-        addToDeviceMap(pocoApps, POCO_F6_PRO);
+        addToDeviceMap(pocoApps, POCO_X6_PRO);
 
         // Populate device map for Xiaomi 14 Pro apps
         String[] mi14Apps = {
@@ -262,7 +262,6 @@ public final class deviceProperties {
         };
         addToDeviceMap(mi14Apps, MI_14_PRO);
     }
-
     /**
      * Adds an array of app package names to the DEVICE_MAP associated with a specific device profile.
      * 
