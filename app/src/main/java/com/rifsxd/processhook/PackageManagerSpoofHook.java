@@ -1,30 +1,25 @@
-package com.yourpackage.hook;
+package com.rifsxd.spoofhook;
 
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-
-import java.lang.reflect.Field;
+import android.content.pm.ApplicationInfo;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
-public class PackageManagerSpoofHook implements IXposedHookLoadPackage {
+public class PackageManagerSpoofHook {
 
-    private static final String ORIGINAL_PKG = "com.pubg.imobile";  // or com.pubg.krmobile
+    private static final String ORIGINAL_PKG = "com.pubg.imobile";
     private static final String SPOOFED_PKG = "com.tencent.ig";
 
-    @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
+    public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
 
-        // Only spoof to system apps that query package info
-        if (!isSystemOrVendorApp(lpparam.packageName)) return;
+        if (!"com.csdroid.pkg".equals(lpparam.packageName)) return;
 
         Class<?> pmClass = XposedHelpers.findClassIfExists("android.app.ApplicationPackageManager", lpparam.classLoader);
         if (pmClass == null) return;
 
-        // Hook getApplicationInfo
         XposedHelpers.findAndHookMethod(pmClass, "getApplicationInfo",
                 String.class, int.class, new XC_MethodHook() {
                     @Override
@@ -35,7 +30,6 @@ public class PackageManagerSpoofHook implements IXposedHookLoadPackage {
                     }
                 });
 
-        // Hook getPackageInfo
         XposedHelpers.findAndHookMethod(pmClass, "getPackageInfo",
                 String.class, int.class, new XC_MethodHook() {
                     @Override
@@ -46,7 +40,6 @@ public class PackageManagerSpoofHook implements IXposedHookLoadPackage {
                     }
                 });
 
-        // Hook getInstallerPackageName (if GameSpace checks it)
         XposedHelpers.findAndHookMethod(pmClass, "getInstallerPackageName",
                 String.class, new XC_MethodHook() {
                     @Override
@@ -56,10 +49,5 @@ public class PackageManagerSpoofHook implements IXposedHookLoadPackage {
                         }
                     }
                 });
-    }
-
-    private boolean isSystemOrVendorApp(String pkg) {
-        return pkg != null &&
-               (pkg.contains("oneplus") || pkg.contains("gamespace") || pkg.contains("system") || pkg.contains("android"));
     }
 }
