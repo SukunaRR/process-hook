@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:allowBackup="true"
-        android:label="@string/app_name"
+        android:label="BGMI Spoofer"
         android:icon="@mipmap/ic_launcher"
-        android:supportsRtl="true"
-        tools:ignore="AllowBackup,MissingApplicationIcon">
+        android:supportsRtl="true">
+
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
         <meta-data
             android:name="xposeddescription"
-            android:value="@string/xposed_description" />
+            android:value="Spoofs BGMI package to PUBG Global" />
         <meta-data
             android:name="xposedminversion"
-            android:value="53" />
+            android:value="93" />
         <meta-data
-            android:name="xposedscope"
-            android:resource="@array/scope" />
+            android:name="xposedmoduleclass"
+            android:value="com.rifsxd.spoofhook.EntryPoint" />
+        
     </application>
 
 </manifest>
