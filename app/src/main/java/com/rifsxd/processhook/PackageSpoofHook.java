@@ -1,8 +1,7 @@
 package com.yourpackage.hook;
 
-import android.app.Application;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 
 import java.lang.reflect.Field;
 
@@ -11,58 +10,56 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
-public class PackageSpoofHook implements IXposedHookLoadPackage {
+public class PackageManagerSpoofHook implements IXposedHookLoadPackage {
 
-    private static final String ORIGINAL_PACKAGE = "com.pubg.imobile"; // or com.pubg.krmobile
-    private static final String SPOOFED_PACKAGE = "com.tencent.ig";
+    private static final String ORIGINAL_PKG = "com.pubg.imobile";  // or com.pubg.krmobile
+    private static final String SPOOFED_PKG = "com.tencent.ig";
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
-        // Only spoof to specific target apps (like system or GameSpace)
-        if (!isTargetApp(lpparam.packageName)) return;
 
-        XposedHelpers.findAndHookMethod(Context.class, "getPackageName", new XC_MethodHook() {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) {
-                String realPkg = ((Context) param.thisObject).getPackageName();
-                if (ORIGINAL_PACKAGE.equals(realPkg)) {
-                    param.setResult(SPOOFED_PACKAGE);
-                }
-            }
-        });
+        // Only spoof to system apps that query package info
+        if (!isSystemOrVendorApp(lpparam.packageName)) return;
 
-        XposedHelpers.findAndHookMethod(Context.class, "getApplicationInfo", new XC_MethodHook() {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) {
-                ApplicationInfo ai = (ApplicationInfo) param.getResult();
-                if (ai != null && ORIGINAL_PACKAGE.equals(ai.packageName)) {
-                    ai.packageName = SPOOFED_PACKAGE;
-                    param.setResult(ai);
-                }
-            }
-        });
+        Class<?> pmClass = XposedHelpers.findClassIfExists("android.app.ApplicationPackageManager", lpparam.classLoader);
+        if (pmClass == null) return;
 
-        // If GameSpace or vendor code uses Application class directly
-        XposedHelpers.findAndHookConstructor(Application.class, new XC_MethodHook() {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) {
-                try {
-                    Application app = (Application) param.thisObject;
-                    if (ORIGINAL_PACKAGE.equals(app.getPackageName())) {
-                        Field pkgField = Application.class.getDeclaredField("mBase");
-                        pkgField.setAccessible(true);
-                        Context base = (Context) pkgField.get(app);
-                        XposedHelpers.setObjectField(base.getApplicationInfo(), "packageName", SPOOFED_PACKAGE);
+        // Hook getApplicationInfo
+        XposedHelpers.findAndHookMethod(pmClass, "getApplicationInfo",
+                String.class, int.class, new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+                        if (ORIGINAL_PKG.equals(param.args[0])) {
+                            param.args[0] = SPOOFED_PKG;
+                        }
                     }
-                } catch (Exception ignored) {}
-            }
-        });
+                });
+
+        // Hook getPackageInfo
+        XposedHelpers.findAndHookMethod(pmClass, "getPackageInfo",
+                String.class, int.class, new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+                        if (ORIGINAL_PKG.equals(param.args[0])) {
+                            param.args[0] = SPOOFED_PKG;
+                        }
+                    }
+                });
+
+        // Hook getInstallerPackageName (if GameSpace checks it)
+        XposedHelpers.findAndHookMethod(pmClass, "getInstallerPackageName",
+                String.class, new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+                        if (ORIGINAL_PKG.equals(param.args[0])) {
+                            param.args[0] = SPOOFED_PKG;
+                        }
+                    }
+                });
     }
 
-    private boolean isTargetApp(String packageName) {
-        return packageName.equals("com.oneplus.gamespace")
-            || packageName.startsWith("com.android")
-            || packageName.startsWith("com.oneplus")
-            || packageName.contains("game");
+    private boolean isSystemOrVendorApp(String pkg) {
+        return pkg != null &&
+               (pkg.contains("oneplus") || pkg.contains("gamespace") || pkg.contains("system") || pkg.contains("android"));
     }
 }
